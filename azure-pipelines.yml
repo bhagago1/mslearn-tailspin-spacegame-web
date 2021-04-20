@@ -6,15 +6,15 @@
 trigger:
   - '*'
   
-  pool:
+pool:
     vmImage: 'ubuntu-18.04'
     demands:
     - npm
   
-  variables:
+variables:
     buildConfiguration: 'Release'
   
-  steps:
+steps:
   - task: UseDotNet@2
     displayName: 'Use .NET Core SDK 3.1.300'
     inputs:
@@ -48,3 +48,16 @@ trigger:
       command: 'build'
       arguments: '--no-restore --configuration Release'
       projects: '**/*.csproj'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish the project - Release'
+    inputs:
+      command: 'publish'
+      projects: '**/*.csproj'
+      publishWebProjects: false
+      arguments: '--no-build --configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
+      zipAfterPublish: true
+    
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: drop'
+    condition: succeeded()      
